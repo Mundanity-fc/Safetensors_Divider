@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "group_id": "embeddings",
+      "name": "嵌入层",
+      "description": "词嵌入和位置嵌入",
+      "tensor_names": [
+        "model.embeddings.word_embeddings.weight",
+        "model.embeddings.position_embeddings.weight"
+      ]
+    },
+    {
+      "group_id": "layer0",
+      "name": "第0层",
+      "description": "第一层编码器",
+      "tensor_names": [
+        "model.encoder.layer.0.attention.self.query.weight"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "metadata": {
+    "format": "pt",
+    "total_size": 1000000
+  },
+  "weight_map": {
+    "model.embeddings.word_embeddings.weight": "model-00001-of-00002.safetensors",
+    "model.embeddings.position_embeddings.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.self.query.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.self.query.bias": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.self.key.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.self.key.bias": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.self.value.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.self.value.bias": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.output.dense.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.attention.output.dense.bias": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.intermediate.dense.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.intermediate.dense.bias": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.output.dense.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.output.dense.bias": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.output.LayerNorm.weight": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.0.output.LayerNorm.bias": "model-00001-of-00002.safetensors",
+    "model.encoder.layer.1.attention.self.query.weight": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.attention.self.query.bias": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.attention.self.key.weight": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.attention.self.key.bias": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.attention.self.value.weight": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.attention.self.value.bias": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.attention.output.dense.weight": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.attention.output.dense.bias": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.intermediate.dense.weight": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.intermediate.dense.bias": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.output.dense.weight": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.output.dense.bias": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.output.LayerNorm.weight": "model-00002-of-00002.safetensors",
+    "model.encoder.layer.1.output.LayerNorm.bias": "model-00002-of-00002.safetensors",
+    "model.pooler.dense.weight": "model-00002-of-00002.safetensors",
+    "model.pooler.dense.bias": "model-00002-of-00002.safetensors"
+  },
+  "tensors": {
+    "model.embeddings.word_embeddings.weight": {
+      "dtype": "F32",
+      "shape": [30522, 768],
+      "data_offsets": [0, 9381888]
+    },
+    "model.embeddings.position_embeddings.weight": {
+      "dtype": "F32",
+      "shape": [512, 768],
+      "data_offsets": [9381888, 10957824]
+    },
+    "model.encoder.layer.0.attention.self.query.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [10957824, 13317120]
+    },
+    "model.encoder.layer.0.attention.self.query.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [13317120, 13320192]
+    },
+    "model.encoder.layer.0.attention.self.key.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [13320192, 15679488]
+    },
+    "model.encoder.layer.0.attention.self.key.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [15679488, 15682560]
+    },
+    "model.encoder.layer.0.attention.self.value.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [15682560, 18041856]
+    },
+    "model.encoder.layer.0.attention.self.value.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [18041856, 18044928]
+    },
+    "model.encoder.layer.0.attention.output.dense.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [18044928, 20404224]
+    },
+    "model.encoder.layer.0.attention.output.dense.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [20404224, 20407296]
+    },
+    "model.encoder.layer.0.intermediate.dense.weight": {
+      "dtype": "F32",
+      "shape": [3072, 768],
+      "data_offsets": [20407296, 29843456]
+    },
+    "model.encoder.layer.0.intermediate.dense.bias": {
+      "dtype": "F32",
+      "shape": [3072],
+      "data_offsets": [29843456, 29855744]
+    },
+    "model.encoder.layer.0.output.dense.weight": {
+      "dtype": "F32",
+      "shape": [768, 3072],
+      "data_offsets": [29855744, 39291904]
+    },
+    "model.encoder.layer.0.output.dense.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [39291904, 39294976]
+    },
+    "model.encoder.layer.0.output.LayerNorm.weight": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [39294976, 39298048]
+    },
+    "model.encoder.layer.0.output.LayerNorm.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [39298048, 39301120]
+    },
+    "model.encoder.layer.1.attention.self.query.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [0, 2359296]
+    },
+    "model.encoder.layer.1.attention.self.query.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [2359296, 2362368]
+    },
+    "model.encoder.layer.1.attention.self.key.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [2362368, 4721664]
+    },
+    "model.encoder.layer.1.attention.self.key.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [4721664, 4724736]
+    },
+    "model.encoder.layer.1.attention.self.value.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [4724736, 7084032]
+    },
+    "model.encoder.layer.1.attention.self.value.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [7084032, 7087104]
+    },
+    "model.encoder.layer.1.attention.output.dense.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [7087104, 9446400]
+    },
+    "model.encoder.layer.1.attention.output.dense.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [9446400, 9449472]
+    },
+    "model.encoder.layer.1.intermediate.dense.weight": {
+      "dtype": "F32",
+      "shape": [3072, 768],
+      "data_offsets": [9449472, 18885632]
+    },
+    "model.encoder.layer.1.intermediate.dense.bias": {
+      "dtype": "F32",
+      "shape": [3072],
+      "data_offsets": [18885632, 18897920]
+    },
+    "model.encoder.layer.1.output.dense.weight": {
+      "dtype": "F32",
+      "shape": [768, 3072],
+      "data_offsets": [18897920, 28334080]
+    },
+    "model.encoder.layer.1.output.dense.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [28334080, 28337152]
+    },
+    "model.encoder.layer.1.output.LayerNorm.weight": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [28337152, 28340224]
+    },
+    "model.encoder.layer.1.output.LayerNorm.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [28340224, 28343296]
+    },
+    "model.pooler.dense.weight": {
+      "dtype": "F32",
+      "shape": [768, 768],
+      "data_offsets": [28343296, 30702592]
+    },
+    "model.pooler.dense.bias": {
+      "dtype": "F32",
+      "shape": [768],
+      "data_offsets": [30702592, 30705664]
+    }
+  }
+}
