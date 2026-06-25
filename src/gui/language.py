@@ -74,6 +74,7 @@ class LanguageManager:
             'status_file_loaded': 'File loaded: {filename}',
             'status_group_created': 'Group created: {name}',
             'status_tensors_added': 'Added {count} tensors to group',
+            'status_tensor_removed': 'Removed tensor: {name}',
             'status_group_deleted': 'Group deleted: {name}',
             'status_export_complete': 'Export complete: {count} groups',
             'status_groups_saved': 'Groups saved to: {filename}',
@@ -111,6 +112,7 @@ class LanguageManager:
             'msg_error_loading_file': 'Error loading file: {error}',
             'msg_select_node_first': 'Please select a node first',
             'msg_select_group_first': 'Please select a group first',
+            'msg_select_tensor_to_remove': 'Please select a tensor to remove',
             'msg_confirm_delete_group': "Are you sure you want to delete group '{name}'?",
             'msg_no_file_loaded': 'Please load a file first',
             'msg_no_groups_to_export': 'No groups to export',
@@ -130,6 +132,10 @@ class LanguageManager:
             'info_yes': 'Yes',
             'info_no': 'No',
             'info_contained_tensors': 'Directly Contained Tensors:',
+            
+            # 分组树形显示
+            'group_node_info': '{name} ({count} tensors, {size})',
+            'tensor_node_info': '{name} - {dtype} {shape}',
             
             # 语言切换
             'language_changed': 'Language changed to {language}',
@@ -189,6 +195,7 @@ class LanguageManager:
             'status_file_loaded': '已加载文件: {filename}',
             'status_group_created': '创建分组: {name}',
             'status_tensors_added': '已添加 {count} 个tensor到分组',
+            'status_tensor_removed': '已移除tensor: {name}',
             'status_group_deleted': '删除分组: {name}',
             'status_export_complete': '导出完成: {count} 个分组',
             'status_groups_saved': '分组已保存到: {filename}',
@@ -226,6 +233,7 @@ class LanguageManager:
             'msg_error_loading_file': '加载文件时出错: {error}',
             'msg_select_node_first': '请先选择一个节点',
             'msg_select_group_first': '请先选择一个分组',
+            'msg_select_tensor_to_remove': '请先选择要移除的tensor',
             'msg_confirm_delete_group': "确定要删除分组 '{name}' 吗？",
             'msg_no_file_loaded': '请先加载文件',
             'msg_no_groups_to_export': '没有可导出的分组',
@@ -245,6 +253,10 @@ class LanguageManager:
             'info_yes': '是',
             'info_no': '否',
             'info_contained_tensors': '直接包含的Tensor:',
+            
+            # 分组树形显示
+            'group_node_info': '{name} ({count} 个tensor, {size})',
+            'tensor_node_info': '{name} - {dtype} {shape}',
             
             # 语言切换
             'language_changed': '语言已切换为 {language}',

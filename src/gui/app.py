@@ -261,23 +261,21 @@ class SafetensorsViewerApp:
         """设置右侧面板（分组管理）"""
         lang = self.lang_manager
         
-        # 分组列表
+        # 分组列表 - 使用树形结构
         self.label_frames['group_list'] = ttk.LabelFrame(parent, text=lang.get_text('group_list_title'))
         self.label_frames['group_list'].pack(fill=tk.BOTH, expand=True)
         
-        self.group_list = ttk.Treeview(
-            self.label_frames['group_list'], 
-            columns=('name', 'count', 'size'), 
-            show='headings'
-        )
-        self.group_headings['name'] = lang.get_text('col_group_name')
-        self.group_headings['count'] = lang.get_text('col_tensor_count')
-        self.group_headings['size'] = lang.get_text('col_size')
+        # 创建分组树形视图
+        self.group_tree = ttk.Treeview(self.label_frames['group_list'])
+        self.group_tree.pack(fill=tk.BOTH, expand=True)
         
-        self.group_list.heading('name', text=self.group_headings['name'])
-        self.group_list.heading('count', text=self.group_headings['count'])
-        self.group_list.heading('size', text=self.group_headings['size'])
-        self.group_list.pack(fill=tk.BOTH, expand=True)
+        # 添加滚动条
+        group_scroll = ttk.Scrollbar(self.label_frames['group_list'], orient=tk.VERTICAL, command=self.group_tree.yview)
+        group_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.group_tree.configure(yscrollcommand=group_scroll.set)
+        
+        # 绑定选择事件
+        self.group_tree.bind('<<TreeviewSelect>>', self.on_group_select)
         
         # 分组操作按钮
         group_ops_frame = ttk.Frame(parent)
@@ -352,11 +350,6 @@ class SafetensorsViewerApp:
             self.label_frames['group_list'].config(text=lang.get_text('group_list_title'))
         if 'group_detail' in self.label_frames:
             self.label_frames['group_detail'].config(text=lang.get_text('group_detail_title'))
-        
-        # 更新分组列表标题
-        self.group_list.heading('name', text=lang.get_text('col_group_name'))
-        self.group_list.heading('count', text=lang.get_text('col_tensor_count'))
-        self.group_list.heading('size', text=lang.get_text('col_size'))
         
         # 更新状态栏
         self.status_var.set(lang.get_text('status_ready'))
@@ -529,7 +522,7 @@ class SafetensorsViewerApp:
             return
         
         # 获取选中的分组
-        group_selection = self.group_list.selection()
+        group_selection = self.group_tree.selection()
         if not group_selection:
             messagebox.showwarning(lang.get_text('msg_warning'), lang.get_text('msg_select_group_first'))
             return
@@ -541,9 +534,21 @@ class SafetensorsViewerApp:
         
         node_path = item_values[0]
         
-        # 获取分组ID
-        group_item = self.group_list.item(group_selection[0])
-        group_id = group_item['values'][0]
+        # 获取分组ID - 检查选中的是分组节点还是tensor节点
+        group_item = self.group_tree.item(group_selection[0])
+        item_tags = group_item.get('tags', [])
+        
+        # 如果选中的是tensor节点，获取其父节点（分组节点）
+        if 'tensor' in item_tags:
+            parent_id = self.group_tree.parent(group_selection[0])
+            if parent_id:
+                group_item = self.group_tree.item(parent_id)
+                group_id = group_item['values'][0]
+            else:
+                return
+        else:
+            # 选中的是分组节点
+            group_id = group_item['values'][0]
         
         # 获取节点及其所有tensor
         node = self.tree_builder.find_node_by_path(node_path)
@@ -570,21 +575,106 @@ class SafetensorsViewerApp:
     
     def remove_from_group(self):
         """从分组中移除选中的tensor"""
-        # 实现类似add_to_group，但调用remove_tensor_from_group
-        pass
+        lang = self.lang_manager
+        
+        # 获取选中的分组树节点
+        group_selection = self.group_tree.selection()
+        if not group_selection:
+            messagebox.showwarning(lang.get_text('msg_warning'), lang.get_text('msg_select_group_first'))
+            return
+        
+        # 获取选中项的信息
+        group_item = self.group_tree.item(group_selection[0])
+        item_tags = group_item.get('tags', [])
+        
+        # 只有选中tensor节点时才能移除
+        if 'tensor' not in item_tags:
+            messagebox.showwarning(lang.get_text('msg_warning'), lang.get_text('msg_select_tensor_to_remove'))
+            return
+        
+        # 获取tensor名称和分组ID
+        tensor_name = group_item['values'][0]
+        parent_id = self.group_tree.parent(group_selection[0])
+        if parent_id:
+            parent_item = self.group_tree.item(parent_id)
+            group_id = parent_item['values'][0]
+            
+            # 从分组中移除
+            self.group_manager.remove_tensor_from_group(group_id, tensor_name)
+            self.update_group_list()
+            self.update_status(lang.get_text('status_tensor_removed', name=tensor_name))
+    
+    def on_group_select(self, event):
+        """分组树选择事件处理"""
+        selection = self.group_tree.selection()
+        if not selection:
+            return
+        
+        # 获取选中项的信息
+        item = self.group_tree.item(selection[0])
+        item_tags = item.get('tags', [])
+        
+        # 更新详情显示
+        self.detail_text.config(state=tk.NORMAL)
+        self.detail_text.delete(1.0, tk.END)
+        
+        if 'group' in item_tags:
+            # 选中的是分组节点
+            group_id = item['values'][0]
+            group = self.group_manager.groups.get(group_id)
+            if group:
+                lang = self.lang_manager
+                total_size = 0
+                for tensor_name in group.tensor_names:
+                    if tensor_name in self.tensors:
+                        total_size += self.tensors[tensor_name].size_bytes
+                
+                info_lines = [
+                    f"Group ID: {group.group_id}",
+                    f"{lang.get_text('label_group_name')} {group.name}",
+                    f"{lang.get_text('label_description')} {group.description}",
+                    f"{lang.get_text('col_tensor_count')} {len(group.tensor_names)}",
+                    f"{lang.get_text('col_size')} {self.format_size(total_size)}"
+                ]
+                self.detail_text.insert(1.0, "\n".join(info_lines))
+        elif 'tensor' in item_tags:
+            # 选中的是tensor节点
+            tensor_name = item['values'][0]
+            if tensor_name in self.tensors:
+                tensor_info = self.tensors[tensor_name]
+                info_lines = [
+                    f"Tensor: {tensor_name}",
+                    f"Type: {tensor_info.dtype}",
+                    f"Shape: {tensor_info.shape}",
+                    f"Size: {self.format_size(tensor_info.size_bytes)}"
+                ]
+                self.detail_text.insert(1.0, "\n".join(info_lines))
+        
+        self.detail_text.config(state=tk.DISABLED)
     
     def delete_group(self):
         """删除选中的分组"""
         lang = self.lang_manager
         
-        selection = self.group_list.selection()
+        selection = self.group_tree.selection()
         if not selection:
             messagebox.showwarning(lang.get_text('msg_warning'), lang.get_text('msg_select_group_first'))
             return
         
-        group_item = self.group_list.item(selection[0])
+        # 获取分组ID - 检查选中的是分组节点还是tensor节点
+        group_item = self.group_tree.item(selection[0])
+        item_tags = group_item.get('tags', [])
+        
+        # 如果选中的是tensor节点，获取其父节点（分组节点）
+        if 'tensor' in item_tags:
+            parent_id = self.group_tree.parent(selection[0])
+            if parent_id:
+                group_item = self.group_tree.item(parent_id)
+            else:
+                return
+        
         group_id = group_item['values'][0]
-        group_name = group_item['values'][1]
+        group_name = group_item['text']
         
         if messagebox.askyesno(lang.get_text('msg_confirm'), lang.get_text('msg_confirm_delete_group', name=group_name)):
             self.group_manager.delete_group(group_id)
@@ -660,12 +750,14 @@ class SafetensorsViewerApp:
         self.update_status(lang.get_text('status_view_refreshed'))
     
     def update_group_list(self):
-        """更新分组列表显示"""
-        # 清空现有项目
-        for item in self.group_list.get_children():
-            self.group_list.delete(item)
+        """更新分组列表显示（树形结构）"""
+        lang = self.lang_manager
         
-        # 添加分组
+        # 清空现有项目
+        for item in self.group_tree.get_children():
+            self.group_tree.delete(item)
+        
+        # 添加分组（作为父节点）
         for group in self.group_manager.get_all_groups():
             # 计算分组大小
             total_size = 0
@@ -673,12 +765,31 @@ class SafetensorsViewerApp:
                 if tensor_name in self.tensors:
                     total_size += self.tensors[tensor_name].size_bytes
             
-            self.group_list.insert('', 'end', values=(
-                group.group_id,
-                group.name,
-                len(group.tensor_names),
-                self.format_size(total_size)
-            ))
+            # 插入分组节点
+            group_text = lang.get_text('group_node_info', 
+                                       name=group.name, 
+                                       count=len(group.tensor_names),
+                                       size=self.format_size(total_size))
+            
+            group_id = self.group_tree.insert('', 'end', 
+                                              text=group_text,
+                                              values=(group.group_id,),
+                                              tags=('group',),
+                                              open=True)  # 默认展开
+            
+            # 添加该分组下的tensor（作为子节点）
+            for tensor_name in group.tensor_names:
+                if tensor_name in self.tensors:
+                    tensor_info = self.tensors[tensor_name]
+                    tensor_text = lang.get_text('tensor_node_info',
+                                               name=tensor_name,
+                                               dtype=tensor_info.dtype,
+                                               shape=tensor_info.shape)
+                    
+                    self.group_tree.insert(group_id, 'end',
+                                          text=tensor_text,
+                                          values=(tensor_name,),
+                                          tags=('tensor',))
     
     def show_about(self):
         """显示关于对话框"""
