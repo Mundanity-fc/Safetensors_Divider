@@ -100,7 +100,10 @@ divide_tool_gui/
 │   └── gui/               # GUI模块
 │       ├── __init__.py
 │       ├── app.py         # 主应用程序
-│       └── language.py    # 语言管理模块
+│       ├── dialogs.py     # 对话框组件
+│       ├── language.py    # 语言管理模块
+│       ├── panels.py      # 面板组件
+│       └── tree_utils.py  # 树形结构工具
 └── tests/                 # 测试文件
     ├── test_core.py       # 核心功能测试
     └── test_language.py   # 语言功能测试
