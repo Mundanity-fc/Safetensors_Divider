@@ -534,21 +534,30 @@ class SafetensorsViewerApp:
         
         node_path = item_values[0]
         
-        # 获取分组ID - 检查选中的是分组节点还是tensor节点
+        # 获取分组ID - 检查选中的是分组节点、前缀节点还是tensor节点
         group_item = self.group_tree.item(group_selection[0])
         item_tags = group_item.get('tags', [])
         
-        # 如果选中的是tensor节点，获取其父节点（分组节点）
-        if 'tensor' in item_tags:
-            parent_id = self.group_tree.parent(group_selection[0])
-            if parent_id:
-                group_item = self.group_tree.item(parent_id)
-                group_id = group_item['values'][0]
-            else:
-                return
-        else:
-            # 选中的是分组节点
-            group_id = group_item['values'][0]
+        # 如果选中的是tensor节点或前缀节点，向上查找到分组节点
+        if 'tensor' in item_tags or 'prefix' in item_tags:
+            current_id = group_selection[0]
+            while current_id:
+                parent_id = self.group_tree.parent(current_id)
+                if parent_id:
+                    parent_item = self.group_tree.item(parent_id)
+                    parent_tags = parent_item.get('tags', [])
+                    if 'group' in parent_tags:
+                        group_item = parent_item
+                        break
+                    current_id = parent_id
+                else:
+                    break
+        
+        # 检查是否找到分组节点
+        if 'group' not in group_item.get('tags', []):
+            return
+        
+        group_id = group_item['values'][0]
         
         # 获取节点及其所有tensor
         node = self.tree_builder.find_node_by_path(node_path)
@@ -637,6 +646,36 @@ class SafetensorsViewerApp:
                     f"{lang.get_text('col_size')} {self.format_size(total_size)}"
                 ]
                 self.detail_text.insert(1.0, "\n".join(info_lines))
+        elif 'prefix' in item_tags:
+            # 选中的是前缀节点
+            prefix_name = item['values'][0]
+            lang = self.lang_manager
+            
+            # 统计该前缀下的tensor数量和大小
+            tensor_count = 0
+            total_size = 0
+            
+            def count_tensors_in_node(node_id):
+                nonlocal tensor_count, total_size
+                for child_id in self.group_tree.get_children(node_id):
+                    child_item = self.group_tree.item(child_id)
+                    child_tags = child_item.get('tags', [])
+                    if 'tensor' in child_tags:
+                        tensor_name = child_item['values'][0]
+                        if tensor_name in self.tensors:
+                            tensor_count += 1
+                            total_size += self.tensors[tensor_name].size_bytes
+                    else:
+                        count_tensors_in_node(child_id)
+            
+            count_tensors_in_node(selection[0])
+            
+            info_lines = [
+                f"Prefix: {prefix_name}",
+                f"{lang.get_text('col_tensor_count')} {tensor_count}",
+                f"{lang.get_text('col_size')} {self.format_size(total_size)}"
+            ]
+            self.detail_text.insert(1.0, "\n".join(info_lines))
         elif 'tensor' in item_tags:
             # 选中的是tensor节点
             tensor_name = item['values'][0]
@@ -661,17 +700,28 @@ class SafetensorsViewerApp:
             messagebox.showwarning(lang.get_text('msg_warning'), lang.get_text('msg_select_group_first'))
             return
         
-        # 获取分组ID - 检查选中的是分组节点还是tensor节点
+        # 获取分组ID - 检查选中的是分组节点、前缀节点还是tensor节点
         group_item = self.group_tree.item(selection[0])
         item_tags = group_item.get('tags', [])
         
-        # 如果选中的是tensor节点，获取其父节点（分组节点）
-        if 'tensor' in item_tags:
-            parent_id = self.group_tree.parent(selection[0])
-            if parent_id:
-                group_item = self.group_tree.item(parent_id)
-            else:
-                return
+        # 如果选中的是tensor节点或前缀节点，向上查找到分组节点
+        if 'tensor' in item_tags or 'prefix' in item_tags:
+            current_id = selection[0]
+            while current_id:
+                parent_id = self.group_tree.parent(current_id)
+                if parent_id:
+                    parent_item = self.group_tree.item(parent_id)
+                    parent_tags = parent_item.get('tags', [])
+                    if 'group' in parent_tags:
+                        group_item = parent_item
+                        break
+                    current_id = parent_id
+                else:
+                    break
+        
+        # 检查是否找到分组节点
+        if 'group' not in group_item.get('tags', []):
+            return
         
         group_id = group_item['values'][0]
         group_name = group_item['text']
@@ -761,9 +811,11 @@ class SafetensorsViewerApp:
         for group in self.group_manager.get_all_groups():
             # 计算分组大小
             total_size = 0
+            valid_tensors = {}
             for tensor_name in group.tensor_names:
                 if tensor_name in self.tensors:
                     total_size += self.tensors[tensor_name].size_bytes
+                    valid_tensors[tensor_name] = self.tensors[tensor_name]
             
             # 插入分组节点
             group_text = lang.get_text('group_node_info', 
@@ -777,19 +829,101 @@ class SafetensorsViewerApp:
                                               tags=('group',),
                                               open=True)  # 默认展开
             
-            # 添加该分组下的tensor（作为子节点）
-            for tensor_name in group.tensor_names:
-                if tensor_name in self.tensors:
-                    tensor_info = self.tensors[tensor_name]
-                    tensor_text = lang.get_text('tensor_node_info',
-                                               name=tensor_name,
-                                               dtype=tensor_info.dtype,
-                                               shape=tensor_info.shape)
+            # 构建分组内的tensor树形结构
+            self._build_group_tensor_tree(group_id, valid_tensors)
+    
+    def _build_group_tensor_tree(self, parent_id: str, tensors: Dict[str, TensorInfo]):
+        """构建分组内的tensor树形结构"""
+        # 构建树形结构字典
+        tree = {}
+        
+        for tensor_name, tensor_info in tensors.items():
+            parts = tensor_name.split('.')
+            current = tree
+            
+            # 构建树状路径
+            for i, part in enumerate(parts[:-1]):
+                if part not in current:
+                    current[part] = {'__children__': {}, '__tensors__': {}}
+                current = current[part]['__children__']
+            
+            # 添加tensor信息
+            leaf_name = parts[-1] if parts else tensor_name
+            if leaf_name not in current:
+                current[leaf_name] = {'__children__': {}, '__tensors__': {}}
+            current[leaf_name]['__tensors__'][tensor_name] = tensor_info
+        
+        # 递归插入节点
+        self._insert_tree_nodes(parent_id, tree)
+    
+    def _insert_tree_nodes(self, parent_id: str, tree: Dict):
+        """递归插入树节点"""
+        for name, subtree in tree.items():
+            # 检查是否有子节点或tensor
+            has_children = bool(subtree.get('__children__', {}))
+            has_tensors = bool(subtree.get('__tensors__', {}))
+            
+            if has_children:
+                # 有子节点，创建前缀节点
+                # 统计该节点下的tensor数量
+                tensor_count = self._count_tensors_in_tree(subtree)
+                
+                prefix_text = f"{name} ({tensor_count} tensors)"
+                prefix_id = self.group_tree.insert(parent_id, 'end',
+                                                  text=prefix_text,
+                                                  values=(name,),
+                                                  tags=('prefix',),
+                                                  open=True)
+                
+                # 递归插入子节点
+                self._insert_tree_nodes(prefix_id, subtree.get('__children__', {}))
+                
+                # 插入当前节点的tensor
+                for tensor_name, tensor_info in subtree.get('__tensors__', {}).items():
+                    self._insert_tensor_node(prefix_id, tensor_name, tensor_info)
+            elif has_tensors:
+                # 只有tensor，没有子节点
+                if len(subtree['__tensors__']) == 1:
+                    # 只有一个tensor，直接添加
+                    tensor_name, tensor_info = list(subtree['__tensors__'].items())[0]
+                    self._insert_tensor_node(parent_id, tensor_name, tensor_info)
+                else:
+                    # 多个tensor，创建前缀节点
+                    prefix_text = f"{name} ({len(subtree['__tensors__'])} tensors)"
+                    prefix_id = self.group_tree.insert(parent_id, 'end',
+                                                      text=prefix_text,
+                                                      values=(name,),
+                                                      tags=('prefix',),
+                                                      open=True)
                     
-                    self.group_tree.insert(group_id, 'end',
-                                          text=tensor_text,
-                                          values=(tensor_name,),
-                                          tags=('tensor',))
+                    # 插入tensor
+                    for tensor_name, tensor_info in subtree['__tensors__'].items():
+                        self._insert_tensor_node(prefix_id, tensor_name, tensor_info)
+    
+    def _count_tensors_in_tree(self, tree: Dict) -> int:
+        """统计树中的tensor数量"""
+        count = len(tree.get('__tensors__', {}))
+        for subtree in tree.get('__children__', {}).values():
+            count += self._count_tensors_in_tree(subtree)
+        return count
+    
+    def _insert_tensor_node(self, parent_id: str, tensor_name: str, tensor_info: TensorInfo):
+        """插入tensor节点"""
+        lang = self.lang_manager
+        
+        # 获取tensor的短名称（最后一部分）
+        short_name = tensor_name.split('.')[-1]
+        
+        # 构建显示文本
+        tensor_text = lang.get_text('tensor_node_info',
+                                    name=short_name,
+                                    dtype=tensor_info.dtype,
+                                    shape=tensor_info.shape)
+        
+        self.group_tree.insert(parent_id, 'end',
+                              text=tensor_text,
+                              values=(tensor_name,),
+                              tags=('tensor',))
     
     def show_about(self):
         """显示关于对话框"""
