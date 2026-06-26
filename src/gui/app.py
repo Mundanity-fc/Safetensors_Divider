@@ -73,50 +73,54 @@ class SafetensorsViewerApp:
         self.root.title(self.lang_manager.get_text('window_title'))
     
     def setup_chinese_font(self):
-        """设置中文字体"""
+        """设置中文字体（fallback字体）"""
+        import tkinter.font as tkFont
+        import platform
+        
+        # 根据操作系统选择最常见的中文字体作为fallback
+        system = platform.system()
+        if system == "Windows":
+            fallback_font = "Microsoft YaHei"
+        elif system == "Darwin":  # macOS
+            fallback_font = "PingFang SC"
+        else:  # Linux
+            fallback_font = "Noto Sans CJK SC"
+        
+        # 尝试设置fallback字体
+        try:
+            self.root.tk.call('font', 'configure', 'TkDefaultFont', '-family', fallback_font, '-size', '10')
+            self.root.tk.call('font', 'configure', 'TkTextFont', '-family', fallback_font, '-size', '10')
+            self.root.tk.call('font', 'configure', 'TkFixedFont', '-family', 'monospace', '-size', '10')
+            self.root.tk.call('font', 'configure', 'TkMenuFont', '-family', fallback_font, '-size', '10')
+            self.root.tk.call('font', 'configure', 'TkHeadingFont', '-family', fallback_font, '-size', '10')
+            self.current_font_family = fallback_font
+            print(f"已设置fallback字体: {fallback_font}")
+        except Exception as e:
+            print(f"设置字体失败: {e}")
+            default_font = tkFont.nametofont("TkDefaultFont")
+            default_font.configure(family="Helvetica", size=10)
+            self.current_font_family = "Helvetica"
+    
+    def get_available_fonts(self):
+        """获取系统可用的字体列表"""
+        import tkinter.font as tkFont
+        available_fonts = tkFont.families(self.root)
+        # 过滤掉一些不常用的字体，只保留常见的
+        return sorted(list(set(available_fonts)))
+    
+    def change_font(self, font_family: str):
+        """更改字体"""
         import tkinter.font as tkFont
         
-        chinese_fonts = [
-            "Source Han Sans SC",
-            "Noto Sans CJK SC",
-            "WenQuanYi Micro Hei",
-            "Microsoft YaHei",
-            "SimHei",
-            "SimSun",
-            "FangSong",
-            "KaiTi"
-        ]
-        
-        selected_font = None
-        for font_name in chinese_fonts:
-            try:
-                self.root.tk.call('font', 'configure', 'TkDefaultFont', '-family', font_name, '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkTextFont', '-family', font_name, '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkFixedFont', '-family', font_name, '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkMenuFont', '-family', font_name, '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkHeadingFont', '-family', font_name, '-size', '10')
-                
-                actual_family = self.root.tk.call('font', 'configure', 'TkDefaultFont', '-family')
-                if actual_family == font_name:
-                    selected_font = font_name
-                    break
-            except Exception:
-                continue
-        
-        if selected_font:
-            print(f"已设置中文字体: {selected_font}")
-        else:
-            try:
-                self.root.tk.call('font', 'configure', 'TkDefaultFont', '-family', 'sans-serif', '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkTextFont', '-family', 'sans-serif', '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkFixedFont', '-family', 'monospace', '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkMenuFont', '-family', 'sans-serif', '-size', '10')
-                self.root.tk.call('font', 'configure', 'TkHeadingFont', '-family', 'sans-serif', '-size', '10')
-                print("已设置字体: sans-serif")
-            except Exception as e:
-                print(f"设置字体失败: {e}")
-                default_font = tkFont.nametofont("TkDefaultFont")
-                default_font.configure(family="Helvetica", size=10)
+        try:
+            self.root.tk.call('font', 'configure', 'TkDefaultFont', '-family', font_family, '-size', '10')
+            self.root.tk.call('font', 'configure', 'TkTextFont', '-family', font_family, '-size', '10')
+            self.root.tk.call('font', 'configure', 'TkMenuFont', '-family', font_family, '-size', '10')
+            self.root.tk.call('font', 'configure', 'TkHeadingFont', '-family', font_family, '-size', '10')
+            self.current_font_family = font_family
+            print(f"已更改字体为: {font_family}")
+        except Exception as e:
+            print(f"更改字体失败: {e}")
     
     def setup_ui(self):
         """设置用户界面"""
@@ -210,6 +214,45 @@ class SafetensorsViewerApp:
                 value=lang_code,
                 command=lambda code=lang_code: self._change_language(code)
             )
+        
+        # 字体菜单
+        font_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label=lang.get_text('menu_font'), menu=font_menu)
+        
+        # 添加字体选择子菜单
+        font_submenu = tk.Menu(font_menu, tearoff=0)
+        font_menu.add_cascade(label=lang.get_text('menu_select_font'), menu=font_submenu)
+        
+        # 获取可用字体列表并添加到子菜单
+        available_fonts = self.get_available_fonts()
+        self.font_var = tk.StringVar(value=self.current_font_family)
+        
+        # 添加常用中文字体
+        chinese_fonts = [f for f in available_fonts if any(c > '\u4e00' for c in f) or 
+                        any(keyword in f.lower() for keyword in ['cjk', 'chinese', 'ming', 'song', 'hei', 'kai', 'fang'])]
+        
+        # 添加其他常见字体
+        common_fonts = [f for f in available_fonts if f not in chinese_fonts][:50]  # 限制数量
+        
+        if chinese_fonts:
+            font_submenu.add_command(label="--- 中文字体 ---", state=tk.DISABLED)
+            for font_name in chinese_fonts[:20]:  # 限制显示数量
+                font_submenu.add_radiobutton(
+                    label=font_name,
+                    variable=self.font_var,
+                    value=font_name,
+                    command=lambda fn=font_name: self.change_font(fn)
+                )
+        
+        if common_fonts:
+            font_submenu.add_command(label="--- 其他字体 ---", state=tk.DISABLED)
+            for font_name in common_fonts:
+                font_submenu.add_radiobutton(
+                    label=font_name,
+                    variable=self.font_var,
+                    value=font_name,
+                    command=lambda fn=font_name: self.change_font(fn)
+                )
         
         # 帮助菜单
         help_menu = tk.Menu(self.menu_bar, tearoff=0)

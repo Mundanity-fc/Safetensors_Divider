@@ -29,6 +29,8 @@ class LanguageManager:
             'menu_operation': 'Operation',
             'menu_help': 'Help',
             'menu_language': 'Language',
+            'menu_font': 'Font',
+            'menu_select_font': 'Select Font',
             
             # 文件菜单
             'menu_open_file': 'Open File',
@@ -159,6 +161,8 @@ class LanguageManager:
             'menu_operation': '操作',
             'menu_help': '帮助',
             'menu_language': '语言',
+            'menu_font': '字体',
+            'menu_select_font': '选择字体',
             
             # 文件菜单
             'menu_open_file': '打开文件',
