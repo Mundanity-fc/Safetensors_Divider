@@ -1,6 +1,9 @@
 """
 safetensors文件解析器
 负责读取index.json文件并解析tensor信息
+支持两种index.json格式：
+1. 包含tensors字段的完整格式（含dtype、shape、data_offsets）
+2. 仅包含weight_map的真实格式（tensor元数据从safetensors文件中读取）
 """
 
 import json
@@ -15,8 +18,12 @@ class TensorInfo:
     name: str
     dtype: str
     shape: List[int]
-    data_offsets: List[int]
+    data_offsets: List[int] = None
     file_name: Optional[str] = None
+    
+    def __post_init__(self):
+        if self.data_offsets is None:
+            self.data_offsets = [0, 0]
     
     @property
     def size_bytes(self) -> int:
@@ -41,8 +48,13 @@ class SafetensorsIndex:
     weight_map: Dict[str, str]  # tensor_name -> file_name
     
     @classmethod
-    def from_json(cls, json_path: str) -> 'SafetensorsIndex':
-        """从index.json文件加载索引"""
+    def from_json(cls, json_path: str, source_dir: Optional[str] = None) -> 'SafetensorsIndex':
+        """从index.json文件加载索引
+        
+        Args:
+            json_path: index.json文件路径
+            source_dir: safetensors文件所在目录，当index.json中没有tensors字段时需要
+        """
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
@@ -50,21 +62,97 @@ class SafetensorsIndex:
         weight_map = data.get('weight_map', {})
         
         tensors = {}
-        for tensor_name, tensor_data in data.get('tensors', {}).items():
-            tensor_info = TensorInfo(
-                name=tensor_name,
-                dtype=tensor_data.get('dtype', 'F32'),
-                shape=tensor_data.get('shape', []),
-                data_offsets=tensor_data.get('data_offsets', [0, 0]),
-                file_name=weight_map.get(tensor_name)
-            )
-            tensors[tensor_name] = tensor_info
+        if 'tensors' in data:
+            # 完整格式：直接从json中读取tensor信息
+            for tensor_name, tensor_data in data['tensors'].items():
+                tensor_info = TensorInfo(
+                    name=tensor_name,
+                    dtype=tensor_data.get('dtype', 'F32'),
+                    shape=tensor_data.get('shape', []),
+                    data_offsets=tensor_data.get('data_offsets', [0, 0]),
+                    file_name=weight_map.get(tensor_name)
+                )
+                tensors[tensor_name] = tensor_info
+        elif weight_map:
+            # 真实格式：从safetensors文件中读取tensor元数据
+            if source_dir is None:
+                source_dir = str(Path(json_path).parent)
+            tensors = cls._load_tensors_from_safetensors(weight_map, source_dir)
         
         return cls(
             metadata=metadata,
             tensors=tensors,
             weight_map=weight_map
         )
+    
+    @staticmethod
+    def _load_tensors_from_safetensors(weight_map: Dict[str, str], source_dir: str) -> Dict[str, TensorInfo]:
+        """从safetensors文件中加载tensor元数据
+        
+        Args:
+            weight_map: tensor名称到文件名的映射
+            source_dir: safetensors文件所在目录
+        """
+        from safetensors import safe_open
+        
+        tensors = {}
+        # 按文件分组，避免重复打开同一文件
+        file_to_tensors: Dict[str, List[str]] = {}
+        for tensor_name, file_name in weight_map.items():
+            if file_name not in file_to_tensors:
+                file_to_tensors[file_name] = []
+            file_to_tensors[file_name].append(tensor_name)
+        
+        for file_name, tensor_names in file_to_tensors.items():
+            file_path = os.path.join(source_dir, file_name)
+            if not os.path.exists(file_path):
+                print(f"警告: safetensors文件不存在: {file_path}")
+                # 创建占位tensor信息
+                for tensor_name in tensor_names:
+                    tensors[tensor_name] = TensorInfo(
+                        name=tensor_name,
+                        dtype='unknown',
+                        shape=[],
+                        data_offsets=[0, 0],
+                        file_name=file_name
+                    )
+                continue
+            
+            try:
+                with safe_open(file_path, framework='numpy') as f:
+                    for tensor_name in tensor_names:
+                        try:
+                            slice_obj = f.get_slice(tensor_name)
+                            shape = slice_obj.get_shape()
+                            dtype = str(slice_obj.get_dtype())
+                            tensors[tensor_name] = TensorInfo(
+                                name=tensor_name,
+                                dtype=dtype,
+                                shape=shape,
+                                data_offsets=[0, 0],
+                                file_name=file_name
+                            )
+                        except Exception as e:
+                            print(f"警告: 无法读取tensor '{tensor_name}' 的元数据: {e}")
+                            tensors[tensor_name] = TensorInfo(
+                                name=tensor_name,
+                                dtype='unknown',
+                                shape=[],
+                                data_offsets=[0, 0],
+                                file_name=file_name
+                            )
+            except Exception as e:
+                print(f"警告: 无法打开safetensors文件 '{file_path}': {e}")
+                for tensor_name in tensor_names:
+                    tensors[tensor_name] = TensorInfo(
+                        name=tensor_name,
+                        dtype='unknown',
+                        shape=[],
+                        data_offsets=[0, 0],
+                        file_name=file_name
+                    )
+        
+        return tensors
     
     def get_tensor_groups_by_prefix(self, separator: str = '.') -> Dict[str, List[str]]:
         """根据前缀对tensor进行分组"""
@@ -107,7 +195,8 @@ class SafetensorsParser:
         if self.file_path.suffix == '.json':
             # 直接加载index.json
             try:
-                self.index = SafetensorsIndex.from_json(str(self.file_path))
+                source_dir = str(self.file_path.parent)
+                self.index = SafetensorsIndex.from_json(str(self.file_path), source_dir)
                 return True
             except Exception as e:
                 print(f"加载index.json失败: {e}")
@@ -126,7 +215,8 @@ class SafetensorsParser:
                     return False
             
             try:
-                self.index = SafetensorsIndex.from_json(str(index_path))
+                source_dir = str(index_path.parent)
+                self.index = SafetensorsIndex.from_json(str(index_path), source_dir)
                 return True
             except Exception as e:
                 print(f"加载index.json失败: {e}")

@@ -47,7 +47,8 @@ class LanguageManager:
             # 工具栏按钮
             'btn_open_file': 'Open File',
             'btn_create_group': 'Create Group',
-            'btn_export': 'Export',
+            'btn_export_single': 'Export Single',
+            'btn_export_all': 'Export All',
             'btn_refresh': 'Refresh',
             
             # 左侧面板
@@ -74,9 +75,10 @@ class LanguageManager:
             'status_file_loaded': 'File loaded: {filename}',
             'status_group_created': 'Group created: {name}',
             'status_tensors_added': 'Added {count} tensors to group',
-            'status_tensor_removed': 'Removed tensor: {name}',
+            'status_tensor_removed': 'Removed: {name}',
             'status_group_deleted': 'Group deleted: {name}',
-            'status_export_complete': 'Export complete: {count} groups',
+            'status_export_single_complete': "Exported group '{name}'",
+            'status_export_all_complete': 'Exported all {count} groups',
             'status_groups_saved': 'Groups saved to: {filename}',
             'status_groups_loaded': 'Groups loaded: {filename}',
             'status_view_refreshed': 'View refreshed',
@@ -117,8 +119,14 @@ class LanguageManager:
             'msg_no_file_loaded': 'Please load a file first',
             'msg_no_groups_to_export': 'No groups to export',
             'msg_export_success': 'Successfully exported {count} groups to:\n{dir}',
+            'msg_export_single_success': "Successfully exported group '{name}' to:\n{dir}",
+            'msg_export_all_success': 'Successfully exported all groups ({count}) to:\n{dir}',
+            'msg_confirm_export_single': "Export group '{name}'?\n\n{count} tensors, {size}",
+            'msg_confirm_export_all': 'Export all {count} groups?\n\nTotal: {tensor_count} tensors, {size}',
             'msg_cannot_load_groups': 'Cannot load groups file',
             'msg_group_id_name_empty': 'Group ID and name cannot be empty',
+            'msg_select_group_for_export': 'Please select a group to export',
+            'msg_export_failed': 'Export failed',
             
             # 关于对话框
             'about_text': 'Safetensors Visualization Split & Combine Tool\n\nFor visual management and splitting of large model safetensors files',
@@ -135,7 +143,7 @@ class LanguageManager:
             
             # 分组树形显示
             'group_node_info': '{name} ({count} tensors, {size})',
-            'tensor_node_info': '{name} - {dtype} {shape}',
+            'tensor_node_info': '{name} {shape} ({size})',
             'prefix_node_info': '{name} ({count} tensors)',
             
             # 语言切换
@@ -169,7 +177,8 @@ class LanguageManager:
             # 工具栏按钮
             'btn_open_file': '打开文件',
             'btn_create_group': '创建分组',
-            'btn_export': '导出',
+            'btn_export_single': '单独导出',
+            'btn_export_all': '整体导出',
             'btn_refresh': '刷新',
             
             # 左侧面板
@@ -198,7 +207,8 @@ class LanguageManager:
             'status_tensors_added': '已添加 {count} 个tensor到分组',
             'status_tensor_removed': '已移除tensor: {name}',
             'status_group_deleted': '删除分组: {name}',
-            'status_export_complete': '导出完成: {count} 个分组',
+            'status_export_single_complete': "已导出分组 '{name}'",
+            'status_export_all_complete': '已导出所有 {count} 个分组',
             'status_groups_saved': '分组已保存到: {filename}',
             'status_groups_loaded': '已加载分组: {filename}',
             'status_view_refreshed': '视图已刷新',
@@ -239,8 +249,14 @@ class LanguageManager:
             'msg_no_file_loaded': '请先加载文件',
             'msg_no_groups_to_export': '没有可导出的分组',
             'msg_export_success': '成功导出 {count} 个分组到:\n{dir}',
+            'msg_export_single_success': "成功导出分组 '{name}' 到:\n{dir}",
+            'msg_export_all_success': '成功导出所有分组 ({count} 个) 到:\n{dir}',
+            'msg_confirm_export_single': "导出分组 '{name}'？\n\n{count} 个tensor，{size}",
+            'msg_confirm_export_all': '导出所有 {count} 个分组？\n\n共 {tensor_count} 个tensor，{size}',
             'msg_cannot_load_groups': '无法加载分组文件',
             'msg_group_id_name_empty': '分组ID和名称不能为空',
+            'msg_select_group_for_export': '请先选择要导出的分组',
+            'msg_export_failed': '导出失败',
             
             # 关于对话框
             'about_text': 'Safetensors 可视化分割与组合工具\n\n用于大模型safetensors文件的可视化管理和分割',
@@ -257,7 +273,7 @@ class LanguageManager:
             
             # 分组树形显示
             'group_node_info': '{name} ({count} 个tensor, {size})',
-            'tensor_node_info': '{name} - {dtype} {shape}',
+            'tensor_node_info': '{name} {shape} ({size})',
             'prefix_node_info': '{name} ({count} 个tensor)',
             
             # 语言切换

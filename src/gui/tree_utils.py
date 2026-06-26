@@ -3,13 +3,19 @@
 包含分组树形结构的构建和操作方法
 """
 
+import re
 from typing import Dict, List, Any
 from ..core.parser import TensorInfo
 
 
+def natural_sort_key(s: str):
+    """自然排序键函数，支持数字排序"""
+    return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
+
+
 def build_group_tensor_tree(tensors: Dict[str, TensorInfo]) -> Dict:
     """
-    构建分组内的tensor树形结构
+    构建分组内的tensor树形结构（已排序）
     
     Args:
         tensors: tensor字典 {name: TensorInfo}
@@ -35,7 +41,20 @@ def build_group_tensor_tree(tensors: Dict[str, TensorInfo]) -> Dict:
             current[leaf_name] = {'__children__': {}, '__tensors__': {}}
         current[leaf_name]['__tensors__'][tensor_name] = tensor_info
     
-    return tree
+    # 对树进行排序
+    return _sort_tree(tree)
+
+
+def _sort_tree(tree: Dict) -> Dict:
+    """递归对树进行排序"""
+    sorted_tree = {}
+    for key in sorted(tree.keys(), key=natural_sort_key):
+        node = tree[key]
+        sorted_tree[key] = {
+            '__children__': _sort_tree(node.get('__children__', {})),
+            '__tensors__': node.get('__tensors__', {})
+        }
+    return sorted_tree
 
 
 def count_tensors_in_tree(tree: Dict) -> int:
@@ -94,7 +113,8 @@ def get_node_info_text(node_tags: List[str], node_values: tuple,
             ]
     elif 'prefix' in node_tags:
         # 前缀节点
-        prefix_name = node_values[0]
+        # values[0] 是完整路径，values[1] 是节点名称
+        prefix_name = node_values[1] if len(node_values) > 1 else node_values[0]
         tensor_count, total_size = count_tensors_and_size_in_node(tree_widget, node_id, tensors)
         
         info_lines = [

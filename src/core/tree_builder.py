@@ -3,9 +3,19 @@
 负责将tensor信息转换为树状结构
 """
 
+import re
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from .parser import TensorInfo
+
+
+def natural_sort_key(s: str):
+    """自然排序键函数，支持数字排序
+    
+    例如: layers.0, layers.1, layers.2, ..., layers.9, layers.10
+    而不是: layers.0, layers.1, layers.10, layers.2, ...
+    """
+    return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
 @dataclass
 class TreeNode:
@@ -52,6 +62,9 @@ class TreeNode:
     
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典表示"""
+        # 对子节点按自然排序排序
+        sorted_children = sorted(self.children.items(), key=lambda x: natural_sort_key(x[0]))
+        
         return {
             'name': self.name,
             'full_path': self.full_path,
@@ -69,7 +82,7 @@ class TreeNode:
             ],
             'children': {
                 name: child.to_dict()
-                for name, child in self.children.items()
+                for name, child in sorted_children
             }
         }
 
@@ -174,5 +187,7 @@ class TreeBuilder:
     def _collect_nodes(self, node: TreeNode, nodes: List[TreeNode]):
         """递归收集节点"""
         nodes.append(node)
-        for child in node.children.values():
+        # 按自然排序遍历子节点
+        sorted_children = sorted(node.children.items(), key=lambda x: natural_sort_key(x[0]))
+        for _, child in sorted_children:
             self._collect_nodes(child, nodes)

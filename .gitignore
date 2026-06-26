@@ -72,5 +72,6 @@ Thumbs.db
 
 # Project specific
 *.json
-!data/*.json
+data/
+export/
 test_groups.json
