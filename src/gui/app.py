@@ -869,7 +869,8 @@ class SafetensorsViewerApp:
             
             if has_children:
                 tensor_count = count_tensors_in_tree(subtree)
-                prefix_text = lang.get_text('prefix_node_info', name=name, count=tensor_count)
+                direct_children_count = len(subtree.get('__children__', {}))
+                prefix_text = lang.get_text('prefix_node_info', name=name, children=direct_children_count, count=tensor_count)
                 
                 # 确定节点的展开状态
                 is_open = True  # 默认展开
@@ -893,7 +894,8 @@ class SafetensorsViewerApp:
                     tensor_name, tensor_info = list(subtree['__tensors__'].items())[0]
                     self._insert_tensor_node(parent_id, tensor_name, tensor_info)
                 else:
-                    prefix_text = lang.get_text('prefix_node_info', name=name, count=len(subtree['__tensors__']))
+                    direct_children_count = len(subtree.get('__tensors__', {}))
+                    prefix_text = lang.get_text('prefix_node_info', name=name, children=direct_children_count, count=len(subtree['__tensors__']))
                     
                     # 确定节点的展开状态
                     is_open = True  # 默认展开

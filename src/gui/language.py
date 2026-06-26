@@ -159,7 +159,7 @@ class LanguageManager:
             # 分组树形显示
             'group_node_info': '{name} ({count} tensors, {size})',
             'tensor_node_info': '{name} {shape} ({size})',
-            'prefix_node_info': '{name} ({count} tensors)',
+            'prefix_node_info': '{name} [{children}] ({count} tensors)',
             
             # 语言切换
             'language_changed': 'Language changed to {language}',
@@ -304,7 +304,7 @@ class LanguageManager:
             # 分组树形显示
             'group_node_info': '{name} ({count} 个tensor, {size})',
             'tensor_node_info': '{name} {shape} ({size})',
-            'prefix_node_info': '{name} ({count} 个tensor)',
+            'prefix_node_info': '{name} [{children}] ({count} 个tensor)',
             
             # 语言切换
             'language_changed': '语言已切换为 {language}',

@@ -75,7 +75,8 @@ class LeftPanel:
                 display_text = f"{node.name} {shape_str} ({format_size_func(tensor.size_bytes)})"
             else:
                 # 非叶子节点或不包含tensor
-                display_text = f"{node.name} ({node.tensor_count} tensors, {format_size_func(node.total_size)})"
+                direct_children_count = len(node.children)
+                display_text = f"{node.name} [{direct_children_count}] ({node.tensor_count} tensors, {format_size_func(node.total_size)})"
             
             # 确定节点的展开状态
             is_open = True  # 默认展开
