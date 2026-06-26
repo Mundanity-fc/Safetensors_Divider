@@ -49,8 +49,8 @@ class LanguageManager:
             # 工具栏按钮
             'btn_open_file': 'Open File',
             'btn_create_group': 'Create Group',
-            'btn_export_single': 'Export Single',
-            'btn_export_all': 'Export All',
+            'btn_export_single': 'Export Single Group',
+            'btn_export_all': 'Export All Groups',
             'btn_refresh': 'Refresh',
             
             # 左侧面板
@@ -194,8 +194,8 @@ class LanguageManager:
             # 工具栏按钮
             'btn_open_file': '打开文件',
             'btn_create_group': '创建分组',
-            'btn_export_single': '单独导出',
-            'btn_export_all': '整体导出',
+            'btn_export_single': '导出单个分组',
+            'btn_export_all': '导出所有分组',
             'btn_refresh': '刷新',
             
             # 左侧面板
