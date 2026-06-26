@@ -75,3 +75,4 @@ Thumbs.db
 data/
 export/
 test_groups.json
+debug.py

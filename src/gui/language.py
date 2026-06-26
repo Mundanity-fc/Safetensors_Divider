@@ -99,6 +99,7 @@ class LanguageManager:
             # 对话框标题
             'dialog_create_group_title': 'Create New Group',
             'dialog_about_title': 'About',
+            'dialog_font_title': 'Select Font',
             
             # 对话框标签
             'label_group_id': 'Group ID:',
@@ -106,6 +107,18 @@ class LanguageManager:
             'label_description': 'Description:',
             'label_ok': 'OK',
             'label_cancel': 'Cancel',
+            'label_default': 'Default',
+            'label_current_font': 'Current Font',
+            'label_search': 'Search:',
+            'label_category': 'Category:',
+            'label_font_list': 'Font List',
+            'label_preview': 'Preview',
+            
+            # 字体分类
+            'category_all': 'All',
+            'category_chinese': 'Chinese',
+            'category_mono': 'Monospace',
+            'category_other': 'Other',
             
             # 消息框
             'msg_error': 'Error',
@@ -231,6 +244,7 @@ class LanguageManager:
             # 对话框标题
             'dialog_create_group_title': '创建新分组',
             'dialog_about_title': '关于',
+            'dialog_font_title': '选择字体',
             
             # 对话框标签
             'label_group_id': '分组ID:',
@@ -238,6 +252,18 @@ class LanguageManager:
             'label_description': '描述:',
             'label_ok': '确定',
             'label_cancel': '取消',
+            'label_default': '默认',
+            'label_current_font': '当前字体',
+            'label_search': '搜索:',
+            'label_category': '分类:',
+            'label_font_list': '字体列表',
+            'label_preview': '预览',
+            
+            # 字体分类
+            'category_all': '全部',
+            'category_chinese': '中文',
+            'category_mono': '等宽',
+            'category_other': '其他',
             
             # 消息框
             'msg_error': '错误',
