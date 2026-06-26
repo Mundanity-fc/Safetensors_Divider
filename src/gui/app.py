@@ -163,16 +163,18 @@ class SafetensorsViewerApp:
         """创建右侧面板的按钮"""
         lang = self.lang_manager
         
-        self.toolbar_buttons['add_to_group'] = self.right_panel.add_button(
+        self.right_panel_buttons = {}
+        
+        self.right_panel_buttons['add_to_group'] = self.right_panel.add_button(
             lang.get_text('btn_add_to_group'), self.add_to_group
         )
-        self.toolbar_buttons['remove_from_group'] = self.right_panel.add_button(
+        self.right_panel_buttons['remove_from_group'] = self.right_panel.add_button(
             lang.get_text('btn_remove_from_group'), self.remove_from_group
         )
-        self.toolbar_buttons['delete_group'] = self.right_panel.add_button(
+        self.right_panel_buttons['delete_group'] = self.right_panel.add_button(
             lang.get_text('btn_delete_group'), self.delete_group
         )
-        self.toolbar_buttons['export_single'] = self.right_panel.add_button(
+        self.right_panel_buttons['export_single'] = self.right_panel.add_button(
             lang.get_text('btn_export_single'), self.export_single_group
         )
     
@@ -277,14 +279,22 @@ class SafetensorsViewerApp:
             'create_group': 'btn_create_group',
             'export_single': 'btn_export_single',
             'export_all': 'btn_export_all',
-            'refresh': 'btn_refresh',
-            'add_to_group': 'btn_add_to_group',
-            'remove_from_group': 'btn_remove_from_group',
-            'delete_group': 'btn_delete_group'
+            'refresh': 'btn_refresh'
         }
         for btn_name, text_key in button_texts.items():
             if btn_name in self.toolbar_buttons:
                 self.toolbar_buttons[btn_name].config(text=lang.get_text(text_key))
+        
+        # 更新右侧面板按钮
+        right_button_texts = {
+            'add_to_group': 'btn_add_to_group',
+            'remove_from_group': 'btn_remove_from_group',
+            'delete_group': 'btn_delete_group',
+            'export_single': 'btn_export_single'
+        }
+        for btn_name, text_key in right_button_texts.items():
+            if hasattr(self, 'right_panel_buttons') and btn_name in self.right_panel_buttons:
+                self.right_panel_buttons[btn_name].config(text=lang.get_text(text_key))
         
         # 更新面板标题
         if self.left_panel:

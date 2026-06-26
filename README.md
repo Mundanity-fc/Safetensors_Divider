@@ -109,22 +109,6 @@ divide_tool_gui/
     └── test_language.py   # 语言功能测试
 ```
 
-## 测试
-
-运行核心功能测试：
-```bash
-python tests/test_core.py
-```
-
-运行语言功能测试：
-```bash
-python tests/test_language.py
-```
-
-## 示例数据
-
-项目包含一个示例index.json文件（`data/test_model.index.json`），用于测试和演示功能。
-
 ## 注意事项
 
 - 当前版本的导出功能仅创建占位文件，实际tensor数据写入需要进一步实现
@@ -135,57 +119,8 @@ python tests/test_language.py
 
 ### 中文无法显示
 
-如果界面中的中文无法显示，请尝试以下解决方案：
-
-1. **安装中文字体**：
-   ```bash
-   # Ubuntu/Debian
-   sudo apt-get install fonts-noto-cjk fonts-wqy-microhei
-   
-   # CentOS/RHEL
-   sudo yum install google-noto-sans-cjk-fonts wqy-microhei-fonts
-   ```
-
-2. **检查系统字体**：
-   ```bash
-   fc-list :lang=zh
-   ```
-
-3. **更新字体缓存**：
-   ```bash
-   sudo fc-cache -fv
-   ```
-
-4. **重启应用程序**：安装字体后，需要重启应用程序才能生效。
-
-### tkinter字体问题
-
-如果遇到tkinter字体相关问题，可以尝试：
-
-1. **检查tkinter版本**：
-   ```python
-   import tkinter
-   print(tkinter.TkVersion)
-   ```
-
-2. **使用系统字体**：应用程序会自动尝试使用系统中可用的中文字体，包括：
-   - Source Han Sans SC (思源黑体)
-   - Noto Sans CJK SC
-   - WenQuanYi Micro Hei (文泉驿微米黑)
-   - Microsoft YaHei (微软雅黑)
-   - SimHei (黑体)
-   - SimSun (宋体)
-
-## 开发计划
-
-- [ ] 实现完整的tensor数据读取和写入
-- [ ] 添加拖放支持
-- [ ] 实现分组的重命名和编辑
-- [ ] 添加批量操作功能
-- [ ] 支持多种导出格式
-- [ ] 添加撤销/重做功能
-- [ ] 优化大型文件的加载性能
+在 Linux 下使用 `uv` 进行 Python 管理时，需要使用系统 Python 来构建 venv,由 `uv` 下载得到的 Python 附带的 `tk` 库无法调用系统的 fontconfig,因此只包含 x11 的默认 fallback 字体 `fixed`
 
 ## 许可证
 
-本项目仅供学习和研究使用。
+遵循 MIT 许可证。
