@@ -15,17 +15,8 @@
 - 🌳 树状图可视化展示tensor层级结构（支持自然排序）
 - 🏷️ 按前缀自动聚合tensor
 - 📦 用户自定义tensor分组（支持树形展开）
-- 💾 分组配置的保存和加载
 - 📤 将分组导出为safetensors格式（支持单独导出和整体导出）
 - 🌍 支持中英文界面切换（默认英文）
-
-### 界面功能
-- 🖥️ 左侧显示safetensors原始结构树
-- 📋 右侧显示自定义分组管理
-- 📊 节点显示tensor的shape和大小信息
-- 🔄 支持节点折叠状态记忆
-- 🎨 支持字体选择对话框（延迟加载系统字体）
-- 📜 左侧和右侧面板均支持垂直滚动条
 
 ### 导出功能
 - **单独导出**：选中一个分组，导出为独立的safetensors文件和index.json
@@ -35,10 +26,10 @@
 ## 安装要求
 
 - Python 3.8+
-- tkinter（通常随Python一起安装）
+- tkinter
 - safetensors库
 - numpy
-- PyTorch（用于支持bfloat16数据导出）
+- PyTorch
 
 ## 安装步骤
 
@@ -87,20 +78,16 @@ python main.py
    - 删除非叶节点时，该节点下的所有子孙tensor都会被移除
 
 6. **导出分组**：
-   - **单独导出**：选中一个分组，点击"单独导出"按钮
-   - **整体导出**：点击"整体导出"按钮，导出所有分组
+   - **单独导出**：选中一个分组，点击"导出单个分组"按钮
+   - **整体导出**：点击"导出所有分组"按钮，导出所有分组
    - 选择导出目录，确认后开始导出
 
-7. **保存/加载分组配置**：
-   - 使用"文件 → 保存分组"保存当前分组配置
-   - 使用"文件 → 加载分组"加载之前的分组配置
-
-8. **切换界面语言**：
+7. **切换界面语言**：
    - 点击菜单"Language"（或"语言"）
    - 选择"English"或"中文"
    - 界面将立即切换到所选语言
 
-9. **选择字体**：
+8. **选择字体**：
    - 点击菜单"字体 → 选择字体"
    - 在弹出的对话框中搜索和选择字体
    - 支持按分类筛选（中文/等宽/其他）
@@ -109,59 +96,27 @@ python main.py
 ## 文件结构
 
 ```
-divide_tool_gui/
+root/
 ├── main.py                    # 主入口文件
-├── start.py                   # 快速启动脚本
 ├── requirements.txt           # 依赖列表
 ├── README.md                  # 本说明文件
-├── data/                      # 测试数据目录
-│   └── examples/              # 示例数据
-│       ├── model.safetensors.index.json
-│       ├── model.safetensors-00001-of-00002.safetensors
-│       └── model.safetensors-00002-of-00002.safetensors
-├── src/                       # 源代码目录
-│   ├── __init__.py
-│   ├── core/                  # 核心功能模块
-│   │   ├── __init__.py
-│   │   ├── parser.py          # safetensors解析器
-│   │   ├── tree_builder.py    # 树状图构建器
-│   │   ├── group_manager.py   # 分组管理器
-│   │   └── exporter.py        # 导出器
-│   └── gui/                   # GUI模块
-│       ├── __init__.py
-│       ├── app.py             # 主应用程序
-│       ├── dialogs.py         # 对话框组件（分组创建、字体选择）
-│       ├── language.py        # 语言管理模块
-│       ├── panels.py          # 面板组件（左右侧面板）
-│       └── tree_utils.py      # 树形结构工具
-└── tests/                     # 测试文件
-    ├── test_core.py           # 核心功能测试
-    └── test_language.py       # 语言功能测试
+└── src/                       # 源代码目录
+    ├── __init__.py
+    ├── core/                  # 核心功能模块
+    │   ├── __init__.py
+    │   ├── parser.py          # safetensors解析器
+    │   ├── tree_builder.py    # 树状图构建器
+    │   ├── group_manager.py   # 分组管理器
+    │   └── exporter.py        # 导出器
+    └── gui/                   # GUI模块
+        ├── __init__.py
+        ├── app.py             # 主应用程序
+        ├── dialogs.py         # 对话框组件（分组创建、字体选择）
+        ├── language.py        # 语言管理模块
+        ├── panels.py          # 面板组件（左右侧面板）
+        └── tree_utils.py      # 树形结构工具
+
 ```
-
-## 技术特性
-
-### 数据格式支持
-- 支持两种index.json格式：
-  1. 完整格式：包含tensors字段（含dtype、shape、data_offsets）
-  2. 真实格式：仅包含weight_map（tensor元数据从safetensors文件中读取）
-
-### 排序功能
-- 树状结构支持自然排序（如 layers.0, layers.1, ..., layers.9, layers.10）
-- 自定义分组中的树结构也支持排序
-
-### 折叠状态记忆
-- 左侧safetensors结构树支持折叠状态记忆
-- 右侧自定义分组树支持折叠状态记忆
-- 当树结构发生变化时，其他节点的折叠展开状态保持不变
-
-### 字体管理
-- 启动时自动选择系统默认中文字体：
-  - Windows: Microsoft YaHei
-  - macOS: PingFang SC
-  - Linux: Noto Sans CJK SC
-- 支持通过字体选择对话框切换字体
-- 字体列表延迟加载（打开对话框时才读取系统字体）
 
 ## 注意事项
 
