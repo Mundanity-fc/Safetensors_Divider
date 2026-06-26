@@ -217,6 +217,22 @@ class SafetensorsViewerApp:
                 command=lambda code=lang_code: self._change_language(code)
             )
         
+        # 查看菜单
+        view_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label=lang.get_text('menu_view'), menu=view_menu)
+        
+        # 折叠全部子菜单
+        collapse_menu = tk.Menu(view_menu, tearoff=0)
+        view_menu.add_cascade(label=lang.get_text('menu_collapse_all'), menu=collapse_menu)
+        collapse_menu.add_command(label=lang.get_text('menu_collapse_left'), command=lambda: self._collapse_all('left'))
+        collapse_menu.add_command(label=lang.get_text('menu_collapse_right'), command=lambda: self._collapse_all('right'))
+        
+        # 展开全部子菜单
+        expand_menu = tk.Menu(view_menu, tearoff=0)
+        view_menu.add_cascade(label=lang.get_text('menu_expand_all'), menu=expand_menu)
+        expand_menu.add_command(label=lang.get_text('menu_expand_left'), command=lambda: self._expand_all('left'))
+        expand_menu.add_command(label=lang.get_text('menu_expand_right'), command=lambda: self._expand_all('right'))
+        
         # 字体菜单
         font_menu = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label=lang.get_text('menu_font'), menu=font_menu)
@@ -776,6 +792,29 @@ class SafetensorsViewerApp:
             self.update_status(lang.get_text('status_export_all_complete', count=len(valid_groups)))
         else:
             messagebox.showerror(lang.get_text('msg_error'), lang.get_text('msg_export_failed'))
+    
+    def _collapse_all(self, side: str):
+        """折叠指定侧面板的所有节点"""
+        if side == 'left' and self.left_panel:
+            self._set_all_nodes_state(self.left_panel.tree_view, False)
+        elif side == 'right' and self.right_panel:
+            self._set_all_nodes_state(self.right_panel.group_tree, False)
+    
+    def _expand_all(self, side: str):
+        """展开指定侧面板的所有节点"""
+        if side == 'left' and self.left_panel:
+            self._set_all_nodes_state(self.left_panel.tree_view, True)
+        elif side == 'right' and self.right_panel:
+            self._set_all_nodes_state(self.right_panel.group_tree, True)
+    
+    def _set_all_nodes_state(self, tree_widget, open_state: bool):
+        """设置所有节点的展开/折叠状态"""
+        def set_state_recursive(parent_id):
+            for child_id in tree_widget.get_children(parent_id):
+                tree_widget.item(child_id, open=open_state)
+                set_state_recursive(child_id)
+        
+        set_state_recursive('')
     
     def save_groups(self):
         """保存分组到文件"""

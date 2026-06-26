@@ -31,6 +31,13 @@ class LanguageManager:
             'menu_language': 'Language',
             'menu_font': 'Font',
             'menu_select_font': 'Select Font',
+            'menu_view': 'View',
+            'menu_collapse_all': 'Collapse All',
+            'menu_expand_all': 'Expand All',
+            'menu_collapse_left': 'Collapse Left',
+            'menu_collapse_right': 'Collapse Right',
+            'menu_expand_left': 'Expand Left',
+            'menu_expand_right': 'Expand Right',
             
             # 文件菜单
             'menu_open_file': 'Open File',
@@ -176,6 +183,13 @@ class LanguageManager:
             'menu_language': '语言',
             'menu_font': '字体',
             'menu_select_font': '选择字体',
+            'menu_view': '查看',
+            'menu_collapse_all': '折叠全部',
+            'menu_expand_all': '展开全部',
+            'menu_collapse_left': '折叠左侧',
+            'menu_collapse_right': '折叠右侧',
+            'menu_expand_left': '展开左侧',
+            'menu_expand_right': '展开右侧',
             
             # 文件菜单
             'menu_open_file': '打开文件',
