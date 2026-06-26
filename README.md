@@ -1,142 +1,154 @@
-# Safetensors 可视化分割与组合工具
+# Safetensors Visualization Split & Combine Tool
 
-## 项目简介
+[中文文档](README_zh.md)
 
-这是一个用于大模型safetensors文件的可视化管理和分割工具。它提供了直观的图形界面，让用户能够：
+## Introduction
 
-1. **查看结构**：以树状图形式展示safetensors文件内部的tensor结构
-2. **手动分组**：根据需要将多个tensor组合成自定义分组
-3. **导出模块**：将分组后的tensor导出为新的safetensors文件
+This is a visualization and management tool for large model safetensors files. It provides an intuitive graphical interface that allows users to:
 
-## 功能特性
+1. **View Structure**: Display the tensor structure inside safetensors files in a tree view
+2. **Manual Grouping**: Combine multiple tensors into custom groups as needed
+3. **Export Modules**: Export grouped tensors as new safetensors files
 
-### 核心功能
-- 📁 支持加载safetensors文件和index.json文件（支持真实格式和测试格式）
-- 🌳 树状图可视化展示tensor层级结构（支持自然排序）
-- 🏷️ 按前缀自动聚合tensor
-- 📦 用户自定义tensor分组（支持树形展开）
-- 📤 将分组导出为safetensors格式（支持单独导出和整体导出）
-- 🌍 支持中英文界面切换（默认英文）
+## Features
 
-### 导出功能
-- **单独导出**：选中一个分组，导出为独立的safetensors文件和index.json
-- **整体导出**：导出所有分组，每个分组一个safetensors文件，一个总的index.json
-- 支持bfloat16数据类型（使用PyTorch后端）
+### Core Features
+- 📁 Support loading safetensors files and index.json files (both real and test formats)
+- 🌳 Tree view visualization of tensor hierarchical structure (with natural sorting)
+- 🏷️ Automatic tensor aggregation by prefix
+- 📦 User-defined tensor grouping (with tree expansion support)
+- 💾 Save and load group configurations
+- 📤 Export groups as safetensors format (single export and batch export)
+- 🌍 Support Chinese and English interface switching (English by default)
 
-## 安装要求
+### Interface Features
+- 🖥️ Left panel displays the original safetensors structure tree
+- 📋 Right panel displays custom group management
+- 📊 Nodes display tensor shape and size information
+- 🔄 Support node collapse state memory
+- 🎨 Support font selection dialog (lazy loading system fonts)
+- 📜 Both left and right panels support vertical scrollbars
+
+### Export Features
+- **Single Export**: Select a group and export as an independent safetensors file and index.json
+- **Batch Export**: Export all groups, each group as a safetensors file, with a total index.json
+- Support bfloat16 data type (using PyTorch backend)
+
+## Requirements
 
 - Python 3.8+
-- tkinter
-- safetensors库
+- tkinter (usually installed with Python)
+- safetensors library
 - numpy
-- PyTorch
+- PyTorch (for bfloat16 data export support)
 
-## 安装步骤
+## Installation
 
-1. 克隆或下载项目
-2. 安装依赖：
+1. Clone or download the project
+2. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-   或使用uv：
+   Or using uv:
    ```bash
    uv pip install -r requirements.txt
    ```
 
-## 使用方法
+## Usage
 
-### 启动应用程序
+### Launch Application
 
 ```bash
 python main.py
 ```
 
-### 基本操作
+### Basic Operations
 
-1. **打开文件**：
-   - 点击菜单"文件 → 打开文件"或工具栏"打开文件"按钮
-   - 选择safetensors文件或对应的index.json文件
+1. **Open File**:
+   - Click menu "File → Open File" or toolbar "Open File" button
+   - Select a safetensors file or corresponding index.json file
 
-2. **查看结构**：
-   - 左侧面板显示tensor的树状结构
-   - 叶子节点显示tensor的shape和大小（如 `weight [248320, 2560] (1.2 GB)`）
-   - 点击节点可在下方查看详细信息
+2. **View Structure**:
+   - Left panel displays the tensor tree structure
+   - Leaf nodes display tensor shape and size (e.g., `weight [248320, 2560] (1.2 GB)`)
+   - Click a node to view detailed information below
 
-3. **创建分组**：
-   - 点击菜单"操作 → 创建分组"或工具栏"创建分组"按钮
-   - 输入分组ID、名称和描述
+3. **Create Group**:
+   - Click menu "Operation → Create Group" or toolbar "Create Group" button
+   - Enter group ID, name, and description
 
-4. **添加tensor到分组**：
-   - 在左侧树状图中选择节点（支持选择非叶节点）
-   - 在右侧分组树中选择目标分组
-   - 点击"添加到分组"按钮
-   - 分组支持树形展开，可查看包含的tensor
+4. **Add Tensor to Group**:
+   - Select a node in the left tree (supports non-leaf nodes)
+   - Select the target group in the right group tree
+   - Click "Add to Group" button
+   - Groups support tree expansion to view contained tensors
 
-5. **从分组移除tensor**：
-   - 在右侧分组树中选择要移除的节点（支持tensor节点和非叶节点）
-   - 点击"从分组移除"按钮
-   - 删除非叶节点时，该节点下的所有子孙tensor都会被移除
+5. **Remove Tensor from Group**:
+   - Select the node to remove in the right group tree (supports tensor nodes and non-leaf nodes)
+   - Click "Remove from Group" button
+   - When deleting a non-leaf node, all descendant tensors under that node will be removed
 
-6. **导出分组**：
-   - **单独导出**：选中一个分组，点击"导出单个分组"按钮
-   - **整体导出**：点击"导出所有分组"按钮，导出所有分组
-   - 选择导出目录，确认后开始导出
+6. **Export Groups**:
+   - **Single Export**: Select a group, click "Export Single Group" button
+   - **Batch Export**: Click "Export All Groups" button to export all groups
+   - Select export directory, confirm to start export
 
-7. **切换界面语言**：
-   - 点击菜单"Language"（或"语言"）
-   - 选择"English"或"中文"
-   - 界面将立即切换到所选语言
+7. **Switch Interface Language**:
+   - Click menu "Language"
+   - Select "English" or "中文"
+   - Interface will immediately switch to the selected language
 
-8. **选择字体**：
-   - 点击菜单"字体 → 选择字体"
-   - 在弹出的对话框中搜索和选择字体
-   - 支持按分类筛选（中文/等宽/其他）
-   - 点击"默认"按钮恢复系统默认字体
+8. **Select Font**:
+   - Click menu "Font → Select Font"
+   - Search and select fonts in the dialog
+   - Support filtering by category (Chinese/Monospace/Other)
+   - Click "Default" button to restore system default font
 
-## 文件结构
+## File Structure
 
 ```
-root/
-├── main.py                    # 主入口文件
-├── requirements.txt           # 依赖列表
-├── README.md                  # 本说明文件
-└── src/                       # 源代码目录
+divide_tool_gui/
+├── main.py                    # Main entry file
+├── start.py                   # Quick start script
+├── requirements.txt           # Dependency list
+├── README.md                  # This file (English)
+├── README_zh.md               # Chinese documentation
+└── src/                       # Source code directory
     ├── __init__.py
-    ├── core/                  # 核心功能模块
+    ├── core/                  # Core functionality modules
     │   ├── __init__.py
-    │   ├── parser.py          # safetensors解析器
-    │   ├── tree_builder.py    # 树状图构建器
-    │   ├── group_manager.py   # 分组管理器
-    │   └── exporter.py        # 导出器
-    └── gui/                   # GUI模块
+    │   ├── parser.py          # safetensors parser
+    │   ├── tree_builder.py    # Tree builder
+    │   ├── group_manager.py   # Group manager
+    │   └── exporter.py        # Exporter
+    └── gui/                   # GUI modules
         ├── __init__.py
-        ├── app.py             # 主应用程序
-        ├── dialogs.py         # 对话框组件（分组创建、字体选择）
-        ├── language.py        # 语言管理模块
-        ├── panels.py          # 面板组件（左右侧面板）
-        └── tree_utils.py      # 树形结构工具
-
+        ├── app.py             # Main application
+        ├── dialogs.py         # Dialog components (group creation, font selection)
+        ├── language.py        # Language management module
+        ├── panels.py          # Panel components (left and right panels)
+        └── tree_utils.py      # Tree structure utilities
 ```
 
-## 注意事项
+## Notes
 
-- 大型safetensors文件可能需要较长的加载时间
-- 建议在导出前保存分组配置，以防数据丢失
-- 导出功能需要PyTorch支持（用于处理bfloat16数据类型）
+- Large safetensors files may take longer to load
+- It is recommended to save group configuration before exporting to prevent data loss
+- Export functionality requires PyTorch support (for handling bfloat16 data type)
 
-## 故障排除
+## Troubleshooting
 
-### 中文无法显示
+### Chinese Characters Not Displaying
 
-在 Linux 下使用 `uv` 进行 Python 管理时，需要使用系统 Python 来构建 venv,由 `uv` 下载得到的 Python 附带的 `tk` 库无法调用系统的 fontconfig,因此只包含 x11 的默认 fallback 字体 `fixed`
+When using `uv` for Python management on Linux, you need to use the system Python to build the venv. The `tk` library downloaded by `uv` cannot call the system's fontconfig, so it only contains the x11 default fallback font `fixed`.
 
-### 导出失败
+### Export Fails
 
-如果导出时出现错误，请检查：
-1. 是否已安装PyTorch：`pip install torch`
-2. 源文件是否存在且可读
-3. 输出目录是否有写入权限
+If export errors occur, please check:
+1. Whether PyTorch is installed: `pip install torch`
+2. Whether the source file exists and is readable
+3. Whether the output directory has write permissions
 
-## 许可证
+## License
 
-遵循 MIT 许可证。
+This project is licensed under the MIT License.
