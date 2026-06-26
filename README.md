@@ -10,6 +10,10 @@ This is a visualization and management tool for large model safetensors files. I
 2. **Manual Grouping**: Combine multiple tensors into custom groups as needed
 3. **Export Modules**: Export grouped tensors as new safetensors files
 
+## Screenshot
+
+![EN_Screenshot](/screenshot/screenshot_en.png)
+
 ## Features
 
 ### Core Features

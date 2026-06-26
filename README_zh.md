@@ -10,6 +10,10 @@
 2. **手动分组**：根据需要将多个tensor组合成自定义分组
 3. **导出模块**：将分组后的tensor导出为新的safetensors文件
 
+## 截图
+
+![ZH_Screenshot](/screenshot/screenshot_zh.png)
+
 ## 功能特性
 
 ### 核心功能
