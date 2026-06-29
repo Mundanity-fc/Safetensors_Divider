@@ -56,27 +56,31 @@ class LeftPanel:
             return
         
         # 递归添加节点
-        self._add_tree_nodes('', tree_root, format_size_func, open_states)
+        self._add_tree_nodes('', tree_root, format_size_func, open_states, tree_root.total_size)
     
     def _add_tree_nodes(self, parent_id: str, node: TreeNode, format_size_func: Callable,
-                        open_states: Optional[Dict[str, bool]] = None):
+                        open_states: Optional[Dict[str, bool]] = None,
+                        model_size: int = 0):
         """递归添加树节点"""
         if node.name == 'root':
             # 根节点，直接添加子节点（按自然排序）
             sorted_children = sorted(node.children.items(), key=lambda x: natural_sort_key(x[0]))
             for child_name, child_node in sorted_children:
-                self._add_tree_nodes(parent_id, child_node, format_size_func, open_states)
+                self._add_tree_nodes(parent_id, child_node, format_size_func, open_states, model_size)
         else:
+            size_percent = (node.total_size / model_size * 100) if model_size else 0
+            size_text = f"{format_size_func(node.total_size)}, {size_percent:.2f}%"
+            
             # 计算显示文本
             if node.tensors and len(node.children) == 0:
                 # 叶子节点且包含tensor，显示tensor详细信息
                 tensor = node.tensors[0]
                 shape_str = str(tensor.shape) if tensor.shape else "[]"
-                display_text = f"{node.name} {shape_str} ({format_size_func(tensor.size_bytes)})"
+                display_text = f"{node.name} {shape_str} ({size_text})"
             else:
                 # 非叶子节点或不包含tensor
                 direct_children_count = len(node.children)
-                display_text = f"{node.name} [{direct_children_count}] ({node.tensor_count} tensors, {format_size_func(node.total_size)})"
+                display_text = f"{node.name} [{direct_children_count}] ({node.tensor_count} tensors, {size_text})"
             
             # 确定节点的展开状态
             is_open = True  # 默认展开
@@ -94,7 +98,7 @@ class LeftPanel:
             # 递归添加子节点（按自然排序）
             sorted_children = sorted(node.children.items(), key=lambda x: natural_sort_key(x[0]))
             for child_name, child_node in sorted_children:
-                self._add_tree_nodes(node_id, child_node, format_size_func, open_states)
+                self._add_tree_nodes(node_id, child_node, format_size_func, open_states, model_size)
     
     def get_open_states(self) -> Dict[str, bool]:
         """获取所有节点的展开状态"""
