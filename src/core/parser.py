@@ -1,9 +1,10 @@
 """
 safetensors文件解析器
-负责读取index.json文件并解析tensor信息
+负责读取index.json文件或直接读取safetensors文件并解析tensor信息
 支持两种index.json格式：
 1. 包含tensors字段的完整格式（含dtype、shape、data_offsets）
 2. 仅包含weight_map的真实格式（tensor元数据从safetensors文件中读取）
+3. 不包含index.json的单个safetensors文件
 """
 
 import json
@@ -31,8 +32,10 @@ class TensorInfo:
         # 根据dtype计算字节数
         dtype_sizes = {
             "F32": 4, "F16": 2, "BF16": 2,
+            "F64": 8, "F8_E5M2": 1, "F8_E4M3": 1,
             "I64": 8, "I32": 4, "I16": 2, "I8": 1,
-            "U8": 1, "BOOL": 1
+            "U64": 8, "U32": 4, "U16": 2, "U8": 1,
+            "BOOL": 1
         }
         element_size = dtype_sizes.get(self.dtype, 4)
         total_elements = 1
@@ -79,6 +82,27 @@ class SafetensorsIndex:
                 source_dir = str(Path(json_path).parent)
             tensors = cls._load_tensors_from_safetensors(weight_map, source_dir)
         
+        return cls(
+            metadata=metadata,
+            tensors=tensors,
+            weight_map=weight_map
+        )
+
+    @classmethod
+    def from_safetensors(cls, safetensors_path: str) -> 'SafetensorsIndex':
+        """直接从无index.json的safetensors文件加载索引"""
+        file_path = Path(safetensors_path)
+        weight_map = {}
+        tensors = {}
+        metadata = {}
+
+        file_tensors = cls._load_all_tensors_from_file(file_path)
+        for tensor_name, tensor_info in file_tensors.items():
+            weight_map[tensor_name] = file_path.name
+            tensors[tensor_name] = tensor_info
+
+        metadata["total_size"] = sum(tensor.size_bytes for tensor in tensors.values())
+
         return cls(
             metadata=metadata,
             tensors=tensors,
@@ -153,6 +177,25 @@ class SafetensorsIndex:
                     )
         
         return tensors
+
+    @staticmethod
+    def _load_all_tensors_from_file(file_path: Path) -> Dict[str, TensorInfo]:
+        """读取单个safetensors文件中的全部tensor元数据"""
+        from safetensors import safe_open
+
+        tensors = {}
+        with safe_open(str(file_path), framework='numpy') as f:
+            for tensor_name in f.keys():
+                slice_obj = f.get_slice(tensor_name)
+                tensors[tensor_name] = TensorInfo(
+                    name=tensor_name,
+                    dtype=str(slice_obj.get_dtype()),
+                    shape=slice_obj.get_shape(),
+                    data_offsets=[0, 0],
+                    file_name=file_path.name
+                )
+
+        return tensors
     
     def get_tensor_groups_by_prefix(self, separator: str = '.') -> Dict[str, List[str]]:
         """根据前缀对tensor进行分组"""
@@ -211,8 +254,13 @@ class SafetensorsParser:
                 if possible_indexes:
                     index_path = possible_indexes[0]
                 else:
-                    print("未找到index.json文件")
-                    return False
+                    # 小模型通常只有单个model.safetensors，没有index.json
+                    try:
+                        self.index = SafetensorsIndex.from_safetensors(str(self.file_path))
+                        return True
+                    except Exception as e:
+                        print(f"加载safetensors文件失败: {e}")
+                        return False
             
             try:
                 source_dir = str(index_path.parent)
