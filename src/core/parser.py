@@ -245,29 +245,13 @@ class SafetensorsParser:
                 print(f"加载index.json失败: {e}")
                 return False
         elif self.file_path.suffix == '.safetensors':
-            # 查找对应的index.json
-            index_path = self.file_path.with_suffix('.safetensors.index.json')
-            if not index_path.exists():
-                # 尝试查找其他index文件
-                parent_dir = self.file_path.parent
-                possible_indexes = list(parent_dir.glob('*.index.json'))
-                if possible_indexes:
-                    index_path = possible_indexes[0]
-                else:
-                    # 小模型通常只有单个model.safetensors，没有index.json
-                    try:
-                        self.index = SafetensorsIndex.from_safetensors(str(self.file_path))
-                        return True
-                    except Exception as e:
-                        print(f"加载safetensors文件失败: {e}")
-                        return False
-            
+            # 直接选择safetensors文件时，只读取该文件本身。
+            # 如需加载完整分片模型，应选择对应的index.json。
             try:
-                source_dir = str(index_path.parent)
-                self.index = SafetensorsIndex.from_json(str(index_path), source_dir)
+                self.index = SafetensorsIndex.from_safetensors(str(self.file_path))
                 return True
             except Exception as e:
-                print(f"加载index.json失败: {e}")
+                print(f"加载safetensors文件失败: {e}")
                 return False
         
         return False
