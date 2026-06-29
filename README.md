@@ -9,6 +9,7 @@ This is a visualization and management tool for large model safetensors files. I
 1. **View Structure**: Display the tensor structure inside safetensors files in a tree view
 2. **Manual Grouping**: Combine multiple tensors into custom groups as needed
 3. **Export Modules**: Export grouped tensors as new safetensors files
+4. **Individual Reading**: Support for reading safetensors files individually, convenient for debugging and testing
 
 ## Screenshot
 
